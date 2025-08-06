@@ -39,3 +39,23 @@ ADMIN_EMAIL_CREATE_ON_STARTUP=["nrodrig1@gmail.com"]
 ```bash
 $ npm start
 ```
+
+## Test that it works from the terminal
+
+### Register
+
+```bash
+curl --location 'http://localhost:3000/users/register' \
+--header 'Content-Type: application/x-www-form-urlencoded' \
+--data-urlencode 'email=someemail@gmail.com' \
+--data-urlencode 'password=test'
+```
+
+### Login
+
+```bash
+    curl --location 'http://localhost:3000/users/login' \
+    --header 'Content-Type: application/x-www-form-urlencoded' \
+    --data-urlencode 'email=someemail@gmail.com' \
+    --data-urlencode 'password=test'
+```

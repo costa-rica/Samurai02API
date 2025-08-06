@@ -36,11 +36,6 @@ router.post("/register", async (req, res) => {
     created: new Date(),
   });
 
-  // Create EntityWhoFoundArticle record for the admin user
-  await EntityWhoFoundArticle.create({
-    userId: user.id,
-  });
-
   const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET);
 
   res.status(201).json({
