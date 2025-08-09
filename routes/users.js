@@ -1,6 +1,6 @@
 var express = require("express");
 var router = express.Router();
-const { User } = require("samurai01db");
+const { User } = require("samurai02db");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const { checkBodyReturnMissing } = require("../modules/common");

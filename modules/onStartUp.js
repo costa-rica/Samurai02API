@@ -1,4 +1,4 @@
-const { User } = require("samurai01db");
+const { User } = require("samurai02db");
 
 const bcrypt = require("bcrypt");
 const fs = require("fs");

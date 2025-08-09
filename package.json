@@ -1,11 +1,12 @@
 {
-  "name": "samurai01api",
+  "name": "samurai02api",
   "version": "0.0.0",
   "private": true,
   "scripts": {
     "start": "node ./bin/www"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.59.0",
     "bcrypt": "^6.0.0",
     "cookie-parser": "~1.4.4",
     "cors": "^2.8.5",
@@ -15,7 +16,7 @@
     "jsonwebtoken": "^9.0.2",
     "morgan": "~1.9.1",
     "npm": "^10.9.3",
-    "samurai01db": "file:../Samurai01Db",
+    "samurai02db": "file:../Samurai02Db",
     "sequelize": "^6.37.7",
     "sqlite3": "^5.1.7",
     "start": "^5.1.0"
