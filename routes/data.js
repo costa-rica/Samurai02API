@@ -45,7 +45,65 @@ router.post("/receive-structured-data", upload.single("file"), async (req, res) 
     // Write file to disk
     fs.writeFileSync(destPath, buffer);
 
-    return res.json({ ok: true, message: "CSV saved.", path: destPath });
+
+    // Trigger rag context update with call to rag API build 
+  const response = await fetch("http://localhost:5050/rag/build-index", {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+
+
+    return res.json({ ok: true, message: "CSV saved. Rag context updated.", path: destPath });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ ok: false, error: "Internal server error." });
+  }
+});
+
+// GET /data/does-context-file-exist
+router.get("/does-context-file-exist", async (req, res) => {
+  try {
+    console.log("- in GET /data/does-context-file-exist");
+
+    const targetDir = process.env.PATH_TO_RAG_CONTEXT_DATA;
+    if (!targetDir) {
+      return res.status(500).json({ ok: false, error: "PATH_TO_RAG_CONTEXT_DATA env var is not set." });
+    }
+
+    const destPath = path.join(targetDir, "user_data.csv");
+
+    if (fs.existsSync(destPath)) {
+      return res.json({ ok: true, exists: true });
+    } else {
+      return res.json({ ok: true, exists: false });
+    }
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ ok: false, error: "Internal server error." });
+  }
+});
+
+// DELETE /data/delete-context-file
+router.delete("/delete-context-file", async (req, res) => {
+  try {
+    console.log("- in DELETE /data/delete-context-file");
+
+    const targetDir = process.env.PATH_TO_RAG_CONTEXT_DATA;
+    if (!targetDir) {
+      return res.status(500).json({ ok: false, error: "PATH_TO_RAG_CONTEXT_DATA env var is not set." });
+    }
+
+    const destPath = path.join(targetDir, "user_data.csv");
+
+    if (fs.existsSync(destPath)) {
+      fs.unlinkSync(destPath);
+      return res.json({ ok: true, message: "Context file deleted." });
+    } else {
+      return res.json({ ok: true, message: "Context file does not exist." });
+    }
   } catch (err) {
     console.error(err);
     return res.status(500).json({ ok: false, error: "Internal server error." });
