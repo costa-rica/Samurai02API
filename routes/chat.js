@@ -11,10 +11,6 @@ router.get("/test", function (req, res, next) {
 const Anthropic = require("@anthropic-ai/sdk");
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
-// In-memory store for demo (use Redis/Postgres in prod)
-// const messagesArray = [];
-
-// // POST /chat - Chat with Claude
 // POST /chat - Chat with Claude
 router.post("/", async (req, res) => {
   const { sessionId, userMessage, messageHistoryArray } = req.body;
@@ -85,90 +81,6 @@ router.post("/", async (req, res) => {
   ];
   return res.json({ history: newMessageHistoryArrayAssistant });
 });
-
-// router.post("/", async (req, res) => {
-//   const { sessionId, userMessage, messageHistoryArray } = req.body;
-
-//   console.log("- in POST /chat");
-//   console.log("sessionId: ", sessionId);
-//   console.log("----- initial messageHistoryArray ----- ");
-//   console.log(JSON.stringify(messageHistoryArray, null, 2));
-//   console.log("-----  ----- ");
-
-//   // 1) Retrieve session history
-//   let historyForClaudeArray = [];
-
-//   if (sessionId === 1) {
-//     console.log("--- Adding message history ----");
-//     // 2) Run RAG retrieval for the latest question
-//     const ragContext = await getRagContext(userMessage, 50);
-//     const newContent = `Here is some relevant context:\n${ragContext}\n\nQuestion: ${userMessage}`;
-
-//     console.log("---- what is this ? ----");
-//     console.log(newContent);
-//     // 3) Append new user turn with RAG context
-//     historyForClaudeArray.push({
-//       role: "user",
-//       content: newContent,
-//       // content: userMessage
-//     });
-//     messageHistoryArray.push({
-//       id: sessionId,
-//       role: "user",
-//       content: newContent,
-//       messageBoxContent: userMessage,
-//     });
-//   } else {
-//     historyForClaudeArray = messageHistoryArray.map((message) => {
-//       return {
-//         role: message.role,
-//         content: message.content,
-//       };
-//     });
-//   }
-
-//   // 4) Call Claude
-//   const completion = await anthropic.messages.create({
-//     model: "claude-sonnet-4-20250514",
-//     max_tokens: 1024,
-//     messages: historyForClaudeArray,
-//   });
-//   console.log("----- reponse form claude ----- ");
-//   if (!completion?.content[0]?.text) {
-//     console.log("No response from Claude");
-//     console.log(JSON.stringify(completion, null, 2));
-//     return res.json({ history: messageHistoryArray });
-//   } else {
-//     console.log(JSON.stringify(completion.content[0].text, null, 2));
-//   }
-
-//   // 5) Save assistant reply to history
-//   const messageFromClaude = {
-//     id: sessionId + 1,
-//     role: "assistant",
-//     content: completion.content[0].text,
-//     messageBoxContent: completion.content[0].text,
-//   };
-//   // sessions[sessionId] = history;
-
-//   const newMessageHistoryArrayAssistant = [...messageHistoryArray];
-//   // // ---- When testing, add a message from Claude ----
-//   // newMessageHistoryArrayAssistant.push({
-//   //   id: sessionId + 1,
-//   //   role: "assistant",
-//   //   content: "This is a test response from Claude",
-//   //   messageBoxContent: `This is a test response from Claude ${sessionId + 1}`,
-//   // });
-
-//   newMessageHistoryArrayAssistant.push(messageFromClaude);
-
-//   // console.log("------  Message history sent back -------");
-
-//   // console.log(JSON.stringify(newMessageHistoryArrayAssistant, null, 2));
-//   // console.log("-----  ----- ");
-
-//   res.json({ history: newMessageHistoryArrayAssistant });
-// });
 
 // GET /request-available-models - List available Anthropic models
 router.get("/request-available-models", async (req, res) => {
