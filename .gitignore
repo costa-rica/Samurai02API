@@ -62,3 +62,4 @@ typings/
 
 ## Nick added
 node_modules
+.DS_Store

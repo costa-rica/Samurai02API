@@ -12,56 +12,76 @@ const path = require("path");
 const upload = multer({ storage: multer.memoryStorage() });
 
 // POST /data/receive-structured-data
-router.post("/receive-structured-data", upload.single("file"), async (req, res) => {
-  try {
-    console.log("- in POST /data/receive-structured-data");
+router.post(
+  "/receive-structured-data",
+  upload.single("file"),
+  async (req, res) => {
+    try {
+      console.log("- in POST /data/receive-structured-data");
 
-    // Validate env var
-    const targetDir = process.env.PATH_TO_RAG_CONTEXT_DATA;
-    if (!targetDir) {
-      return res.status(500).json({ ok: false, error: "PATH_TO_RAG_CONTEXT_DATA env var is not set." });
+      // Validate env var
+      const targetDir = process.env.PATH_TO_RAG_CONTEXT_DATA;
+      if (!targetDir) {
+        return res.status(500).json({
+          ok: false,
+          error: "PATH_TO_RAG_CONTEXT_DATA env var is not set.",
+        });
+      }
+
+      // Validate that a file was provided
+      if (!req.file) {
+        return res.status(400).json({
+          ok: false,
+          error: "No file provided. Expecting field name 'file'.",
+        });
+      }
+
+      // Basic CSV validation by mimetype and filename extension
+      const { originalname, mimetype, buffer } = req.file;
+      const lower = (originalname || "").toLowerCase();
+      const isCsvMime =
+        mimetype === "text/csv" || mimetype === "application/vnd.ms-excel";
+      const isCsvExt = lower.endsWith(".csv");
+
+      if (!(isCsvMime || isCsvExt)) {
+        return res
+          .status(400)
+          .json({ ok: false, error: "Only CSV files are accepted." });
+      }
+
+      // Ensure directory exists
+      fs.mkdirSync(targetDir, { recursive: true });
+
+      const destPath = path.join(targetDir, "user_data.csv");
+
+      // Write file to disk
+      fs.writeFileSync(destPath, buffer);
+
+      console.log("- about to send request to rag API build-index");
+      // Trigger rag context update with call to rag API build
+      const response = await fetch(
+        `${process.env.URL_BASE_API_RAG}/rag/build-index`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      return res.json({
+        ok: true,
+        message: "CSV saved. Rag context updated.",
+        path: destPath,
+      });
+    } catch (err) {
+      console.error(err);
+      return res
+        .status(500)
+        .json({ ok: false, error: "Internal server error." });
     }
-
-    // Validate that a file was provided
-    if (!req.file) {
-      return res.status(400).json({ ok: false, error: "No file provided. Expecting field name 'file'." });
-    }
-
-    // Basic CSV validation by mimetype and filename extension
-    const { originalname, mimetype, buffer } = req.file;
-    const lower = (originalname || "").toLowerCase();
-    const isCsvMime = mimetype === "text/csv" || mimetype === "application/vnd.ms-excel";
-    const isCsvExt = lower.endsWith(".csv");
-
-    if (!(isCsvMime || isCsvExt)) {
-      return res.status(400).json({ ok: false, error: "Only CSV files are accepted." });
-    }
-
-    // Ensure directory exists
-    fs.mkdirSync(targetDir, { recursive: true });
-
-    const destPath = path.join(targetDir, "user_data.csv");
-
-    // Write file to disk
-    fs.writeFileSync(destPath, buffer);
-
-
-    // Trigger rag context update with call to rag API build 
-  const response = await fetch("http://localhost:5050/rag/build-index", {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-
-
-
-    return res.json({ ok: true, message: "CSV saved. Rag context updated.", path: destPath });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ ok: false, error: "Internal server error." });
   }
-});
+);
 
 // GET /data/does-context-file-exist
 router.get("/does-context-file-exist", async (req, res) => {
@@ -70,7 +90,10 @@ router.get("/does-context-file-exist", async (req, res) => {
 
     const targetDir = process.env.PATH_TO_RAG_CONTEXT_DATA;
     if (!targetDir) {
-      return res.status(500).json({ ok: false, error: "PATH_TO_RAG_CONTEXT_DATA env var is not set." });
+      return res.status(500).json({
+        ok: false,
+        error: "PATH_TO_RAG_CONTEXT_DATA env var is not set.",
+      });
     }
 
     const destPath = path.join(targetDir, "user_data.csv");
@@ -93,7 +116,10 @@ router.delete("/delete-context-file", async (req, res) => {
 
     const targetDir = process.env.PATH_TO_RAG_CONTEXT_DATA;
     if (!targetDir) {
-      return res.status(500).json({ ok: false, error: "PATH_TO_RAG_CONTEXT_DATA env var is not set." });
+      return res.status(500).json({
+        ok: false,
+        error: "PATH_TO_RAG_CONTEXT_DATA env var is not set.",
+      });
     }
 
     const destPath = path.join(targetDir, "user_data.csv");
@@ -111,5 +137,3 @@ router.delete("/delete-context-file", async (req, res) => {
 });
 
 module.exports = router;
-
-    
