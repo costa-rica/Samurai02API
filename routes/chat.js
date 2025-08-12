@@ -25,6 +25,11 @@ router.post("/", async (req, res) => {
     const ragContext = await getRagContext(userMessage, 50);
     const newContent = `Here is some relevant context:\n${ragContext}\n\nQuestion: ${userMessage}`;
 
+    console.log("------ ragContext ------");
+
+    console.log(JSON.stringify(ragContext, null, 2));
+    console.log("-----------------------");
+
     historyForClaudeArray.push({ role: "user", content: newContent });
 
     // Append to the site-visible history with the display text preserved
@@ -54,6 +59,10 @@ router.post("/", async (req, res) => {
       messageBoxContent: userMessage,
     });
   }
+
+  console.log(" ----------- history for Claude ----------- ");
+  console.log(JSON.stringify(historyForClaudeArray, null, 2));
+  console.log("-----------------------");
 
   // Call Claude with complete history (including this new user turn)
   const completion = await anthropic.messages.create({
